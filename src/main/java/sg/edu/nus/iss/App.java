@@ -1,75 +1,147 @@
 package sg.edu.nus.iss;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.Console;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
-/**
- * Hello world!
- *
- */
-public class App 
-{
-    public static void main( String[] args )
+public class App {
+    public static void main( String[] args ) throws IOException
     {
-        System.out.println( "Hello World!" );
+        // first argument passed in is the directory to create
+        String dirPath = args[0];
 
-        Console con = System.console();
-        String name = con.readLine("What is your name? ");
-        
-        // System.out.printf("Nice to meet you, %s", name);
-        
-        if (name.length() > 0) {
-            System.out.printf("\nNice to meet you, %s", name);
+        // Use File class to check if directory exists
+        // if directory doesn't exist, create the directory using variable dirPath
+        File newDirectory = new File(dirPath);
+        if (newDirectory.exists()) {
+            System.out.println("Accessing " + newDirectory + " directory");
         } else {
-            System.err.println("You have not told me your name");
-        };
-
-        // slide 17 
-        String input = con.readLine("\nWhat is your hobby?");
-        input = input.trim();
-
-        // if (input.equals("swim")) {
-        //     System.out.println("The nearest swimming pool is Clementi");
-        // } else if (input.equals("jog")) {
-        //     System.out.println("The nearest park is West Coast Park");
-        // } else if (input.equals("cycle")) {
-        //     System.out.println("You could cycle along the PCN");
-        // } else {
-        //     System.out.println("Seems like you are a boring person without hobbies");
-        // }
-
-        //slide 18
-        switch(input) {
-            case "swim":
-                System.out.println("The nearest swimming pool is Clementi");
-                break;
-            case "jog":
-                System.out.println("The nearest park is West Coast Park");
-                break;
-            case "cycle":
-                System.out.println("You could cycle along the PCN");
-                break;
-            default:
-                System.out.println("Seems like you are a boring person without hobbies");
-                break;
-        }   
-
-        //slide 19
-        Integer myAge = 0;
-        String myAgeInput = con.readLine("What is your age? ");
-        myAge = Integer.parseInt(myAgeInput);
-
-        if (myAge <= 0)   {
-            System.err.println("Are you sure?");
-        } else if ((myAge > 0) && (myAge < 7)) {
-            System.out.println("You are a toddler");
-        } else if ((myAge >= 7) && (myAge < 12)) {
-            System.out.println("You are a child");
-        } else if ((myAge >= 12) && (myAge < 18)) {
-            System.out.println("You are a teen");
-        } else {
-            System.out.println("You are an adult");
+            newDirectory.mkdir();
         }
-    
 
+        System.out.println("Welcome to my Shopping Cart");
+
+        // List collection to store the cart items of login user
+        List<String> cartItems = new ArrayList<String>();
+
+        // use Console class to read from keyboard input
+        Console con = System.console();
+        String input = "";
+
+        // used to keep track of current login-in user
+        // this is also used as the filename to store the user cart items
+        String loginuser = "";
+
+        // exit while loop if keypboard 'input' equals to 'quit'
+        while(!input.equals("quit")) {
+            input = con.readLine("What do you want to do? ");
+
+            if (input.startsWith("login")) {
+                Scanner scan = new Scanner(input.substring(6));
+
+                while(scan.hasNext()) {
+                    loginuser = scan.next();
+                }
+
+                // check if the file <loginuser> exists
+                // if not exists, create a new file so that you can write to the file
+                // else (maybe) override
+                File loginFile = new File(dirPath + File.separator + loginuser);
+                if (loginFile.exists()) {
+                    System.out.println("File " + loginuser + " already exists");
+                } else {
+                    loginFile.createNewFile();
+                }
+            }
+
+            if (input.equals("users")) {
+                File directoryPath = new File(dirPath);
+
+                String [] directoryListing = directoryPath.list();
+                System.out.println("List of files and directories in the specific folder " + dirPath);
+                for (String dirList : directoryListing) {
+                    System.out.println(dirList);
+                }
+            }
+
+            if (input.startsWith("add")) {
+                input = input.replace(',', ' ');
+
+                // 1. use FileWriter & PrintWriter to write to a <loginuser> file
+                FileWriter fw = new FileWriter(dirPath + File.separator + loginuser, true);
+                PrintWriter pw = new PrintWriter(fw);
+
+                String currentScanString = "";
+                Scanner inputScanner = new Scanner(input.substring(4));
+                while(inputScanner.hasNext()) {
+                    currentScanString = inputScanner.next();
+                    cartItems.add(currentScanString);
+
+                    // 2. write to file using PrintWriter
+                    pw.write("\n" + currentScanString);
+                }
+
+                // 3. flush and close the fileWriter & PrintWriter objects
+                pw.flush();
+                pw.close();
+                fw.close();
+
+            }
+
+            // user must be logged in i.e login corina
+            if (input.equals("list")) {
+                // 1. need a File class and BufferedReader class to read the cart items from the file
+                File readFile = new File(dirPath + File.separator + loginuser);
+                BufferedReader br = new BufferedReader(new FileReader(readFile));
+
+                String readFileInput = "";
+
+                //reset cart items list collection
+                cartItems = new ArrayList<String>();
+
+                // 2. while loop to read through all the item records in the file
+                while((readFileInput = br.readLine()) !=null) {
+                    System.out.println(readFileInput);
+                    cartItems.add(readFileInput);
+                }
+
+                //3. exit from while loop - close buffered reader class/object
+                br.close();
+            }
+
+            if (input.startsWith("delete")) {
+                String [] stringVal = input.split(" ");
+
+                int deleteIndex = Integer.parseInt(stringVal[1]);
+                if ( deleteIndex <= cartItems.size()) {
+                    cartItems.remove(deleteIndex);
+                } else {
+                    System.out.println("Index out of range error.");
+                }
+
+                FileWriter fw = new FileWriter(dirPath + File.separator + loginuser, false);
+                BufferedWriter bw = new BufferedWriter(fw);
+
+                int listIndex = 0;
+                while (listIndex < cartItems.size()) {
+                    bw.write(cartItems.get(listIndex));
+                    bw.newLine();
+
+                    listIndex++;
+                }
+
+                bw.flush();
+                bw.close();
+                fw.close();
+            }
+        }   
     }
 }
