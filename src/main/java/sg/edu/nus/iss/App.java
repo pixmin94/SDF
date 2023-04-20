@@ -1,75 +1,65 @@
 package sg.edu.nus.iss;
 
-import java.io.Console;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
-    public static void main( String[] args )
+    public static void main( String[] args ) throws IOException
     {
-        System.out.println( "Hello World!" );
+        String dirPath = args[0];
+        String fileName = args[1];
+        String dirPathFileName = dirPath + File.separator + fileName;
+        System.out.println(dirPathFileName);
 
-        Console con = System.console();
-        String name = con.readLine("What is your name? ");
-        
-        // System.out.printf("Nice to meet you, %s", name);
-        
-        if (name.length() > 0) {
-            System.out.printf("\nNice to meet you, %s", name);
+        File newDir = new File(dirPath);
+        if (newDir.exists()) {
+            System.out.println("Accessing " + dirPath + " directory");
         } else {
-            System.err.println("You have not told me your name");
-        };
-
-        // slide 17 
-        String input = con.readLine("\nWhat is your hobby?");
-        input = input.trim();
-
-        // if (input.equals("swim")) {
-        //     System.out.println("The nearest swimming pool is Clementi");
-        // } else if (input.equals("jog")) {
-        //     System.out.println("The nearest park is West Coast Park");
-        // } else if (input.equals("cycle")) {
-        //     System.out.println("You could cycle along the PCN");
-        // } else {
-        //     System.out.println("Seems like you are a boring person without hobbies");
-        // }
-
-        //slide 18
-        switch(input) {
-            case "swim":
-                System.out.println("The nearest swimming pool is Clementi");
-                break;
-            case "jog":
-                System.out.println("The nearest park is West Coast Park");
-                break;
-            case "cycle":
-                System.out.println("You could cycle along the PCN");
-                break;
-            default:
-                System.out.println("Seems like you are a boring person without hobbies");
-                break;
-        }   
-
-        //slide 19
-        Integer myAge = 0;
-        String myAgeInput = con.readLine("What is your age? ");
-        myAge = Integer.parseInt(myAgeInput);
-
-        if (myAge <= 0)   {
-            System.err.println("Are you sure?");
-        } else if ((myAge > 0) && (myAge < 7)) {
-            System.out.println("You are a toddler");
-        } else if ((myAge >= 7) && (myAge < 12)) {
-            System.out.println("You are a child");
-        } else if ((myAge >= 12) && (myAge < 18)) {
-            System.out.println("You are a teen");
-        } else {
-            System.out.println("You are an adult");
+            newDir.mkdir();
         }
-    
 
+        File newFile = new File(dirPathFileName);
+        if (!newFile.exists()) {
+            System.out.println(dirPathFileName + "file does not exist");
+            System.exit(0);
+        }
+
+        // 1. use FileReader and BufferedReader to read file
+        FileReader fr = new FileReader(new File(dirPathFileName));
+        BufferedReader br = new BufferedReader(fr);
+        
+        StringBuilder sbFileContent = new StringBuilder();
+        String lineInput = "";
+        // 2. while loop to read file into a string variable
+        while ((lineInput = br.readLine()) != null) {
+            lineInput = lineInput.toLowerCase();
+            sbFileContent.append(lineInput);
+        }
+
+        // 3. close the readers
+        br.close();
+        fr.close();
+
+        String fileContent = sbFileContent.toString();
+        fileContent = fileContent.replaceAll("\\p{P}", " ");
+
+        String [] fileContentArray = fileContent.split(" ");
+        Map<String, Integer> words = new HashMap<>();
+        for (String word: fileContentArray) {
+            Integer wordCount = words.get(word);
+            if (wordCount == null) {
+                words.put(word, 1);
+            } else {
+                words.put(word, wordCount + 1);
+            }
+        }
+
+        System.out.println(fileContent);
+        System.out.println(words);
     }
 }
