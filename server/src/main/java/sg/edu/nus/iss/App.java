@@ -48,17 +48,24 @@ public class App
 
                 while (!msgReceived.equals("close")){
                     msgReceived = dis.readUTF();
+                    System.out.println(msgReceived);
 
                     if (msgReceived.equals("get-cookie")) {
                         String randomCookie = cookie.getRandomCookie();
 
                         dos.writeUTF(randomCookie);
+                        dos.flush();
+                    } else {
+                        dos.writeUTF("");
+                        dos.flush();
                     }
                 }
+
                 //closes all output streams in reverse order
                 dos.close();
                 bos.close();
                 os.close();
+                
             } catch (EOFException ex) {
                 ex.printStackTrace();
             }
