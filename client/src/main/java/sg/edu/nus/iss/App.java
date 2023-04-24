@@ -33,11 +33,11 @@ public class App
         
         // similar to server - slide 9
         try (InputStream is = socket.getInputStream()) {
-            BufferedInputStream bis = new BufferedInputStream(is);
+            // BufferedInputStream bis = new BufferedInputStream(is);
             DataInputStream dis = new DataInputStream(bis);
 
             try (OutputStream os = socket.getOutputStream()) {
-                BufferedOutputStream bos = new BufferedOutputStream(os);
+                // BufferedOutputStream bos = new BufferedOutputStream(os);
                 DataOutputStream dos = new DataOutputStream(bos);
 
                 // while loop here
@@ -58,7 +58,7 @@ public class App
                 bos.close();
                 os.close();
             } catch (EOFException ex) {
-
+                ex.printStackTrace();
             }
 
             // closes the input stream in reverse order

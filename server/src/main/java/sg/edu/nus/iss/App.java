@@ -19,18 +19,18 @@ public class App
         String fileName = args[0];
         String port = args[1];
 
+        // instantiate file object
         File cookieFile = new File(fileName);
         if (!cookieFile.exists()) {
             System.out.println("Cookie file not found");
             System.exit(0);
         }
 
+        // test cookie
         Cookie cookie = new Cookie();
         cookie.readCookieFile(fileName);
         String myCookie = cookie.getRandomCookie();
         System.out.println(myCookie);
-        String myCookie2 = cookie.getRandomCookie();
-        System.out.println(myCookie2);
 
         //slide 8 - establish server connection
         ServerSocket server = new ServerSocket(Integer.parseInt(port));
@@ -65,7 +65,7 @@ public class App
                 dos.close();
                 bos.close();
                 os.close();
-                
+
             } catch (EOFException ex) {
                 ex.printStackTrace();
             }
