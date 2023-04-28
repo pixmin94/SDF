@@ -1,19 +1,20 @@
 package sg.edu.nus.iss;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
 
 public class ShoppingCartDB {
      
-    private List<String> users;
     private String currentDirectory;
     private String currentLoggedIn;
 
-    public List<String> getUsers() { return users; }
-    public void setUsers(List<String> users) { this.users = users; }
     public String getCurrentLoggedIn() { return currentLoggedIn; }
     public void setCurrentLoggedIn(String currentLoggedIn) { this.currentLoggedIn = currentLoggedIn; }
+    public String getCurrentDirectory() { return currentDirectory; }
+    public void setCurrentDirectory(String currentDirectory) { this.currentDirectory = currentDirectory; }
 
     public ShoppingCartDB(String directory) {
         this.currentDirectory = directory;
@@ -30,12 +31,23 @@ public class ShoppingCartDB {
         }
     }
 
-    public void save() {
+    public void save(List<String> cartList) throws IOException {
+        FileWriter fw = new FileWriter(this.currentDirectory + File.separator + this.currentLoggedIn, true);
+        BufferedWriter bw = new BufferedWriter(fw);
 
+        int i = 0;
+        while (i < cartList.size()) {
+            bw.write(cartList.get(i));
+            bw.newLine();
+            i++;
+        }
+        bw.flush();
+        bw.close();
+        fw.close();
+        System.out.println("Saved to "+this.currentLoggedIn+" db!");
     }
 
-    public List<String> users() {
-        
-        return this.getUsers();
-    }
+    // public List<String> users() {
+    //     return this.getUsers();
+    // }
 }
