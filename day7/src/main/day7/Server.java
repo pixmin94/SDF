@@ -23,11 +23,12 @@ public class Server {
         InputStream is = sock.getInputStream();
         BufferedInputStream bis = new BufferedInputStream(is);
 
-        byte[] buffer = bis.readAllBytes();
+        byte[] buffer = bis.readAllBytes(); //preferable to implement a while loop to read bit by bit incase file size is very big
         File file = new File("received_file.txt");
 
         FileOutputStream fos = new FileOutputStream(file);
         fos.write(buffer);
+        fos.flush();
         long fileSize = file.length();
 
         System.out.println("File size is: "+ fileSize +" bytes.");
