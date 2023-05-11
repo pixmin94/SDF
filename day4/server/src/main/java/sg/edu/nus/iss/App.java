@@ -11,6 +11,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import sg.edu.nus.iss.CookieClientHandler;
 
 public class App 
 {
@@ -27,58 +30,26 @@ public class App
         }
 
         // test cookie
-        Cookie cookie = new Cookie();
-        cookie.readCookieFile(fileName);
-        String myCookie = cookie.getRandomCookie();
-        System.out.println(myCookie);
+        // Cookie cookie = new Cookie();
+        // cookie.readCookieFile(fileName);
+        // String myCookie = cookie.getRandomCookie();
+        // System.out.println(myCookie);
 
-        //slide 8 - establish server connection
+
         ServerSocket server = new ServerSocket(Integer.parseInt(port));
-        Socket socket = server.accept();
+        ExecutorService threadPool = Executors.newFixedThreadPool(3);
 
-        try(InputStream is = socket.getInputStream()) {
-            BufferedInputStream bis = new BufferedInputStream(is);
-            DataInputStream dis = new DataInputStream(bis);
+        String input;
 
-            String msgReceived = "";
+        while (true) {
+            System.out.println("Waiting for connection...");
+            Socket socket = server.accept();
+            System.out.println("Connection received: "+socket);
+            CookieClientHandler handler = new CookieClientHandler(socket);
+            System.out.println("Dispatching client to thread pool");
+            threadPool.submit(handler);
 
-            try(OutputStream os = socket.getOutputStream()) {
-                BufferedOutputStream bos = new BufferedOutputStream(os);
-                DataOutputStream dos = new DataOutputStream(bos);
-
-                while (!msgReceived.equals("close")){
-                    msgReceived = dis.readUTF();
-                    System.out.println(msgReceived);
-
-                    if (msgReceived.equals("get-cookie")) {
-                        String randomCookie = cookie.getRandomCookie();
-
-                        dos.writeUTF(randomCookie);
-                        dos.flush();
-                    } else {
-                        dos.writeUTF("");
-                        dos.flush();
-                    }
-                }
-
-                //closes all output streams in reverse order
-                dos.close();
-                bos.close();
-                os.close();
-
-            } catch (EOFException ex) {
-                ex.printStackTrace();
-            }
-
-            //close all input streams in reverse order
-            dis.close();
-            bis.close();
-            is.close();
-
-        } catch (EOFException ex) {
-            socket.close();
-            server.close();
         }
-
+        
     }
 }
